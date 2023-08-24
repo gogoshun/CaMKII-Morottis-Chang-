@@ -71,7 +71,6 @@ decay_CaM = 3 # seconds
 phospho_rate = 1
 phosphatase = 1
 
-@variables t J_cam_dyadSL(t)
 rn_osys = convert(ODESystem, ca_model)
 @named sys = extend(osys, rn_osys)
 
