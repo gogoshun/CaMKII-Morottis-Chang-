@@ -3,8 +3,6 @@ using DifferentialEquations
 using Plots
 using ModelingToolkit
 using Sundials
-using ODEInterfaceDiffEq
-
 
 function get_Morotti_equations()
     @variables t
@@ -408,7 +406,7 @@ function get_Morotti_equations()
 
 ## BAR
     # Drug concentrations
-    Ligtot = 0.0               # [uM] - SET LIGAND CONCENTRATION (0 or 0.1)
+    Ligtot = 0.1               # [uM] - SET LIGAND CONCENTRATION (0 or 0.1)
     FSK=0
     IBMX=0
     LCCtotBA = 0.025           # [uM] - [umol/L cytosol]
@@ -1594,8 +1592,6 @@ function get_Morotti_equations()
                 cAMP_eqs, PKA_eqs, PP1_eqs, PLB_eqs, PLM_eqs, LCC_eqs, RyRp_eqs, TnI_eqs, IKs_eqs, CFTR_eqs, Ikur_eqs)
 end
 
-
-
 eq_morotti = get_Morotti_equations()
 
 @named osys = ODESystem(eq_morotti)
@@ -1606,22 +1602,21 @@ osys = structural_simplify(osys)
 
 ##Chemical Reaction
 ca_model = @reaction_network begin
-    ##(d*50e-9, d), 0 <--> Ca
     ##  Two Ca2+ ions bind to C or N-lobe.
-    (k_1C_on*($Cai)^2*k_2C_on/(k_1C_off+k_2C_on*($Cai)),k_1C_off*k_2C_off/(k_1C_off+k_2C_on*($Cai))), CaM0 <--> Ca2CaM_C
-    (k_1N_on*($Cai)^2*k_2N_on/(k_1N_off+k_2N_on*($Cai)), k_1N_off*k_2N_off/(k_1N_off+k_2N_on*($Cai))), CaM0 <--> Ca2CaM_N
-    (k_1C_on*($Cai)^2*k_2C_on/(k_1C_off+k_2C_on*($Cai)), k_1C_off*k_2C_off/(k_1C_off+k_2C_on*($Cai))), Ca2CaM_C <--> Ca4CaM
-    (k_1N_on*($Cai)^2*k_2N_on/(k_1N_off+k_2N_on*($Cai)), k_1N_off*k_2N_off/(k_1N_off+k_2N_on*($Cai))), Ca2CaM_N <--> Ca4CaM
+    (k_1C_on*($Cai)^2*(t<=tstop)*k_2C_on/(k_1C_off+k_2C_on*($Cai)*(t<=tstop)), k_1C_off*k_2C_off/(k_1C_off+k_2C_on*($Cai)*(t<=tstop))), CaM0 <--> Ca2CaM_C
+    (k_1N_on*($Cai)^2*(t<=tstop)*k_2N_on/(k_1N_off+k_2N_on*($Cai)*(t<=tstop)), k_1N_off*k_2N_off/(k_1N_off+k_2N_on*($Cai)*(t<=tstop))), CaM0 <--> Ca2CaM_N
+    (k_1C_on*($Cai)^2*(t<=tstop)*k_2C_on/(k_1C_off+k_2C_on*($Cai)*(t<=tstop)), k_1C_off*k_2C_off/(k_1C_off+k_2C_on*($Cai)*(t<=tstop))), Ca2CaM_C <--> Ca4CaM
+    (k_1N_on*($Cai)^2*(t<=tstop)*k_2N_on/(k_1N_off+k_2N_on*($Cai)*(t<=tstop)), k_1N_off*k_2N_off/(k_1N_off+k_2N_on*($Cai)*(t<=tstop))), Ca2CaM_N <--> Ca4CaM
     ##  Two Ca2+ ions bind to C or N-lobe of CaM-CaMKII complex.
-    (k_K1C_on*($Cai)^2*k_K2C_on/(k_K1C_off+k_K2C_on*($Cai)), k_K1C_off*k_K2C_off/(k_K1C_off+k_K2C_on*($Cai))), CaM0_CaMK <--> Ca2CaM_C_CaMK
-    (k_K1N_on*($Cai)^2*k_K2N_on/(k_K1N_off+k_K2N_on*($Cai)), k_K1N_off*k_K2N_off/(k_K1N_off+k_K2N_on*($Cai))), CaM0_CaMK <--> Ca2CaM_N_CaMK
-    (k_K1C_on*($Cai)^2*k_K2C_on/(k_K1C_off+k_K2C_on*($Cai)), k_K1C_off*k_K2C_off/(k_K1C_off+k_K2C_on*($Cai))), Ca2CaM_C_CaMK <--> Ca4CaM_CaMK
-    (k_K1N_on*($Cai)^2*k_K2N_on/(k_K1N_off+k_K2N_on*($Cai)), k_K1N_off*k_K2N_off/(k_K1N_off+k_K2N_on*($Cai))), Ca2CaM_N_CaMK <--> Ca4CaM_CaMK
+    (k_K1C_on*($Cai)^2*(t<=tstop)*k_K2C_on/(k_K1C_off+k_K2C_on*($Cai)*(t<=tstop)), k_K1C_off*k_K2C_off/(k_K1C_off+k_K2C_on*($Cai)*(t<=tstop))), CaM0_CaMK <--> Ca2CaM_C_CaMK
+    (k_K1N_on*($Cai)^2*(t<=tstop)*k_K2N_on/(k_K1N_off+k_K2N_on*($Cai)*(t<=tstop)), k_K1N_off*k_K2N_off/(k_K1N_off+k_K2N_on*($Cai)*(t<=tstop))), CaM0_CaMK <--> Ca2CaM_N_CaMK
+    (k_K1C_on*($Cai)^2*(t<=tstop)*k_K2C_on/(k_K1C_off+k_K2C_on*($Cai)*(t<=tstop)), k_K1C_off*k_K2C_off/(k_K1C_off+k_K2C_on*($Cai)*(t<=tstop))), Ca2CaM_C_CaMK <--> Ca4CaM_CaMK
+    (k_K1N_on*($Cai)^2*(t<=tstop)*k_K2N_on/(k_K1N_off+k_K2N_on*($Cai)*(t<=tstop)), k_K1N_off*k_K2N_off/(k_K1N_off+k_K2N_on*($Cai)*(t<=tstop))), Ca2CaM_N_CaMK <--> Ca4CaM_CaMK
     ##  Binding of Ca to CaM-CaMKIIP.
-    (k_K1C_on*k_K2C_on/(k_K1C_off+k_K2C_on*($Cai))*($Cai)^2, k_K1C_off*k_K2C_off/(k_K1C_off+k_K2C_on*($Cai))), CaM0_CaMKP <--> Ca2CaM_C_CaMKP
-    (k_K1N_on*k_K2N_on/(k_K1N_off+k_K2N_on*($Cai))*($Cai)^2, k_K1N_off*k_K2N_off/(k_K1N_off+k_K2N_on*($Cai))), CaM0_CaMKP <--> Ca2CaM_N_CaMKP
-    (k_K1C_on*k_K2C_on/(k_K1C_off+k_K2C_on*($Cai))*($Cai)^2, k_K1C_off*k_K2C_off/(k_K1C_off+k_K2C_on*($Cai))), Ca2CaM_C_CaMKP <--> Ca4CaM_CaMKP
-    (k_K1N_on*k_K2N_on/(k_K1N_off+k_K2N_on*($Cai))*($Cai)^2, k_K1N_off*k_K2N_off/(k_K1N_off+k_K2N_on*($Cai))), Ca2CaM_N_CaMKP <--> Ca4CaM_CaMKP
+    (k_K1C_on*k_K2C_on/(k_K1C_off+k_K2C_on*($Cai)*(t<=tstop))*($Cai)^2*(t<=tstop), k_K1C_off*k_K2C_off/(k_K1C_off+k_K2C_on*($Cai)*(t<=tstop))), CaM0_CaMKP <--> Ca2CaM_C_CaMKP
+    (k_K1N_on*k_K2N_on/(k_K1N_off+k_K2N_on*($Cai)*(t<=tstop))*($Cai)^2*(t<=tstop), k_K1N_off*k_K2N_off/(k_K1N_off+k_K2N_on*($Cai)*(t<=tstop))), CaM0_CaMKP <--> Ca2CaM_N_CaMKP
+    (k_K1C_on*k_K2C_on/(k_K1C_off+k_K2C_on*($Cai)*(t<=tstop))*($Cai)^2*(t<=tstop), k_K1C_off*k_K2C_off/(k_K1C_off+k_K2C_on*($Cai)*(t<=tstop))), Ca2CaM_C_CaMKP <--> Ca4CaM_CaMKP
+    (k_K1N_on*k_K2N_on/(k_K1N_off+k_K2N_on*($Cai)*(t<=tstop))*($Cai)^2*(t<=tstop), k_K1N_off*k_K2N_off/(k_K1N_off+k_K2N_on*($Cai)*(t<=tstop))), Ca2CaM_N_CaMKP <--> Ca4CaM_CaMKP
     ##  Binding of CaM to CaMKII or CaMII-P
     (kCaM0_on, kCaM0_off), CaM0 + CaMK <--> CaM0_CaMK
     (kCaM2C_on, kCaM2C_off), Ca2CaM_C + CaMK <--> Ca2CaM_C_CaMK
@@ -1642,17 +1637,18 @@ ca_model = @reaction_network begin
 end
 
 ###########################  Parameters  ###########################
-CaMT = 30e-6 #Total calmodulin concentration.
-CaMKII_T = 70e-6 #Total CaMKII concentration.
+CaMT = 30e-6*1e3 #Total calmodulin concentration. *1e3[M]->[mM]
+CaMKII_T = 70e-6*1e3 #Total CaMKII concentration. M->mM
 
 binding_To_PCaMK = 0.1
-decay_CaM = 3 # seconds
+decay_CaM = 3*1e3 # seconds -> ms
 phospho_rate = 1
 phosphatase = 1
 
 rn_osys = convert(ODESystem, ca_model)
 @named sys = extend(osys, rn_osys)
 
+sys = structural_simplify(sys)
 
 @unpack Na_m, Na_h, Na_j, ICa_HH4, ICa_HH5, ICa_HH6, ICa_HH7, Itos_x, Itos_y, Itof_x, Itof_y, Ikr, IKs, RyR_R, RyR_O, RyR_I, NaBj, NaBsl,  
         TnCL, TnCHc, TnCHm, CaM, Myosin_ca, Myosin_mg, SRB, SLLj, SLLsl, SLHj, SLHsl, Csqn, Ca_sr, Naj, Nasl, Nai, Ki, Ca_j, Ca_sl, Cai, Vm, 
@@ -1675,7 +1671,9 @@ rn_osys = convert(ODESystem, ca_model)
         k_1N_on, k_1N_off, k_2N_on, k_2N_off, k_K1C_on, k_K1C_off, k_K2C_on, k_K2C_off, k_K1N_on, k_K1N_off,
         k_K2N_on, k_K2N_off, kCaM0_on, kCaM2C_on, kCaM2N_on, kCaM4_on, kCaM0_off, kCaM2C_off, kCaM2N_off, kCaM4_off, 
         kCaM0P_on, kCaM2CP_on, kCaM2NP_on, kCaM4P_on, kCaM0P_off, kCaM2CP_off, kCaM2NP_off, kCaM4P_off, k_phosCaM, 
-        k_dephospho, k_P1_P2, k_P2_P1, CaMKII_T = sys
+        k_dephospho, k_P1_P2, k_P2_P1, CaMKII_T, tstop = sys
+
+tspan = (0.0, 10e4)
 
 oprob = ODEProblem(sys, [
         Na_m => 1.94e-3, Na_h => 0.981, Na_j => 0.987, ICa_HH4 => 7.02e-6, ICa_HH5 => 1.00068, ICa_HH6 => 2.7e-2, 
@@ -1708,26 +1706,37 @@ oprob = ODEProblem(sys, [
         PKACII => 2.15e-2, PKACII_PKI => 3.62e-2, I1p_PP1 => 7.27e-2, I1ptot => 7.28e-2, PLBp => 8.454, PLMp => 5.6, 
         LCCap => 5.49e-3, LCCbp => 6.27e-3, RyRp => 2.76e-2, TnIp => 4.389, KS79 => 1.53e-3, KS80 => 1.53e-3, KSp => 1.84e-3, 
         CFTRp => 4.06e-3, KURp => 1.09e-2,
-        CaM0 => 2.82e-5, Ca2CaM_C => 1.01e-8, Ca2CaM_N => 1.40e-9, Ca4CaM => 4.78e-13,
-        CaM0_CaMK => 1.29e-6, Ca2CaM_C_CaMK => 9.13e-8, Ca2CaM_N_CaMK => 3.74e-9, Ca4CaM_CaMK => 5.92e-10,
-        CaM0_CaMKP => 2.36e-7, Ca2CaM_C_CaMKP => 1.13e-7, Ca2CaM_N_CaMKP => 1.54e-9, Ca4CaM_CaMKP => 7.82e-10,
-        CaMK => 6.73e-5, CaMKP => 6.57e-7, CaMKP2 => 2.66e-7], 
-        (0.0, 10000.0), 
-        [k_1C_on => 5e3, k_1C_off => 50e-3, k_2C_on => 10e3, k_2C_off => 10e-3, 
-        k_1N_on => 100e3, k_1N_off => 2000e-3, k_2N_on => 200e3, k_2N_off => 500e-3,
-        k_K1C_on => 44e3, k_K1C_off => 33e-3, k_K2C_on => 44e3, k_K2C_off => 0.8e-3,
-        k_K1N_on => 76e3, k_K1N_off => 300e-3, k_K2N_on => 76e3, k_K2N_off => 20e-3,
-        kCaM0_on => 3.8, kCaM2C_on => 0.92e3, kCaM2N_on => 0.12e3, kCaM4_on => 30e3, 
-        kCaM0_off => 5.5e-3, kCaM2C_off => 6.8e-3, kCaM2N_off => 1.7e-3, kCaM4_off => 1.5e-3, 
-        kCaM0P_on => 3.8*binding_To_PCaMK, kCaM2CP_on => 0.92e3*binding_To_PCaMK, 
-        kCaM2NP_on => 0.12e3*binding_To_PCaMK, kCaM4P_on => 30e3*binding_To_PCaMK,
-        kCaM0P_off => 1e-3/decay_CaM, kCaM2CP_off => 1e-3/decay_CaM, kCaM2NP_off => 1e-3/decay_CaM, kCaM4P_off => 1e-3/decay_CaM,
-        k_phosCaM => 30e-3 * phospho_rate, k_dephospho => 1e-3/6 * phosphatase, k_P1_P2 => 1e-3/60, k_P2_P1 => 1e-3/6*0.25, CaMKII_T => 70e-6])
+        CaM0 => 2.82e-5*1e3, Ca2CaM_C => 1.01e-8*1e3, Ca2CaM_N => 1.40e-9*1e3, Ca4CaM => 4.78e-13*1e3,
+        CaM0_CaMK => 1.29e-6*1e3, Ca2CaM_C_CaMK => 9.13e-8*1e3, Ca2CaM_N_CaMK => 3.74e-9*1e3, Ca4CaM_CaMK => 5.92e-10*1e3,
+        CaM0_CaMKP => 2.36e-7*1e3, Ca2CaM_C_CaMKP => 1.13e-7*1e3, Ca2CaM_N_CaMKP => 1.54e-9*1e3, Ca4CaM_CaMKP => 7.82e-10*1e3,
+        CaMK => 6.73e-5*1e3, CaMKP => 6.57e-7*1e3, CaMKP2 => 2.66e-7*1e3], 
+        tspan, 
+        [k_1C_on => 5, k_1C_off => 50e-3, k_2C_on => 10, k_2C_off => 10e-3, k_1N_on => 100, 
+        k_1N_off => 2000e-3, k_2N_on => 200, k_2N_off => 500e-3, k_K1C_on => 44, k_K1C_off => 33e-3, 
+        k_K2C_on => 44, k_K2C_off => 0.8e-3, k_K1N_on => 76, k_K1N_off => 300e-3, k_K2N_on => 76, 
+        k_K2N_off => 20e-3, kCaM0_on => 3.8e-3, kCaM2C_on => 0.92, kCaM2N_on => 0.12, kCaM4_on => 30,
+        kCaM0_off => 5.5e-3, kCaM2C_off => 6.8e-3, kCaM2N_off => 1.7e-3, kCaM4_off => 1.5e-3,
+        kCaM0P_on => 3.8e-3*binding_To_PCaMK, kCaM2CP_on => 0.92*binding_To_PCaMK,
+        kCaM2NP_on => 0.12*binding_To_PCaMK, kCaM4P_on => 30*binding_To_PCaMK,
+        kCaM0P_off => 1/decay_CaM, kCaM2CP_off => 1/decay_CaM, kCaM2NP_off => 1/decay_CaM, kCaM4P_off => 1/decay_CaM,
+        k_phosCaM => 30e-3 * phospho_rate, k_dephospho => (1/6000)*phosphatase, k_P1_P2 => 1/60000,
+        k_P2_P1 => (1/6000)*0.25, CaMKII_T => 70e-3, tstop => 6e4])
 
-sol = solve(oprob, CVODE_BDF(), abstol = 1e-10, reltol = 1e-10, tstops = 0:1000:10000)
+#using BenchmarkTools
 
-plot(sol, idxs=Cai, linewidth=1.5, title="Calcium Transient", xlabel="Time(s)", ylabel="[Ca2+](M)", label="ISO=0.1", xlim=(0,1050))
+#sol = solve(oprob, Rodas4P(), abstol = 1e-9, reltol = 1e-9, tstops = 0:1000:tspan[end], maxiters=Int(1e8))
+sol = solve(oprob, FBDF(), abstol = 1e-8, reltol = 1e-8, tstops = 0:1000:tspan[end], maxiters=Int(1e8))
 
-plot(sol, idxs=Cai, linewidth=1.5, title="Calcium Transient (Control)", xlabel="Time(s)", ylabel="[Ca2+](M)", label="Rodas5, tol=1e-12", xlim=(0,10.15e3))
+plot(sol, idxs=[Pb_dyad+Pt_dyad+Pt2_dyad+Pa_dyad], linewidth=1.5, title="CaMKII Transient", xlabel="Time(ms)", ylabel="dCaMKII(mM)", label="PP1_PLBtot=0.05")
 
-plot(sol, idxs=Vm, linewidth=1.5, title="Action Potential (Control)", xlabel="Time(ms)", ylabel="Voltage (mV)",ylim=(-90,60),xlim=(0,10.15e3),label="Rodas5, tol=1e-12")
+plot(sol, idxs=Cai, linewidth=1.5, title="Calcium Transient", xlabel="Time(ms)", ylabel="[Ca2+](mM)", label="ISO=0", xlim=(0,1015))
+
+plot(sol, idxs=Cai, linewidth=1.5, title="Calcium Transient (1Hz)", xlabel="Time(ms)", ylabel="[Ca2+](mM)", label="ISO=0.1", xlim=(0,1.05e5),denseplot=false)
+
+plot(sol, idxs=Vm, linewidth=1.5, title="Action Potential (Control)", xlabel="Time(ms)", ylabel="Voltage (mV)",ylim=(-90,60),xlim=(0,10.15e4),label="ISO=0",denseplot=false)
+
+plot(sol, idxs=[CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + CaMKP+CaMKP2], linewidth=1.5, xlabel="Time(ms)", ylabel="Concentration(mM)", title="CaMKII Activity (ISO=0.1)", label="Freq=1Hz",denseplot=false)
+
+plot!(sol, idxs=[CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + CaMKP+CaMKP2], linewidth=1.5, xlabel="Time(ms)", ylabel="Concentration(mM)", title="CaMKII Activity (ISO=0.1)", label="Freq=2Hz",denseplot=false)
+
+plot!(sol, idxs=[CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + CaMKP+CaMKP2], linewidth=1.5, xlabel="Time(ms)", ylabel="Concentration(mM)", title="CaMKII Activity (ISO=0.1)", label="Freq=3Hz",denseplot=false)
